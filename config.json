@@ -1,0 +1,1 @@
+config = {  "tokenEndpoint": "http://localhost:8000/token" }

@@ -1,6 +1,6 @@
 async function getToken() {
   try {
-    const response = await fetch('http://localhost:8000/token');
+    const response = await fetch(config.tokenEndpoint);
     const tokenData = await response.json();
     return tokenData.clientToken;
   } catch (error) {
