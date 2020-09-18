@@ -8,9 +8,35 @@ async function getToken() {
   }
 }
 
+loadPaymentData = function(googlePaymentInstance, paymentsClient, paymentDataRequest) {
+  const resultData = document.querySelector('#result-data');
+  const customerData = document.querySelector('#customer-data');
+
+  paymentsClient.loadPaymentData(paymentDataRequest)
+  .then(function (paymentData) {
+    return googlePaymentInstance.parseResponse(paymentData);
+  }).then(function (result) {
+    resultData.value = JSON.stringify(result, null, 2);
+    return fetch(config.customerEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify({ "nonce": result.nonce })
+    });
+  }).then(function (data) {
+    return data.json();
+  }).then(function(data) {
+    customerData.value = JSON.stringify(data, null, 2);
+  }).catch(function (error) {
+    alert('Failure ' + error.statusMessage);
+  });
+}
+
+
 getToken().then(async (client_token) => {
   const paymentsClient = new google.payments.api.PaymentsClient({
-    environment: 'TEST' // FOR PRODUCIION SET TO  'PRODUCTION'
+    environment: config.environment
   });
 
   const clientInstance = await braintree.client.create({
@@ -20,7 +46,7 @@ getToken().then(async (client_token) => {
   const googlePaymentInstance = await braintree.googlePayment.create({
     client: clientInstance,
     googlePayVersion: 2,
-    googleMerchantId: null // FOR PRODUCITON NEEDS THE MERCHANT ID POPULATED HERE!
+    googleMerchantId: config.merchantId // FOR PRODUCITON NEEDS THE MERCHANT ID POPULATED HERE!
   });
   
   const isReadyToPay = await paymentsClient.isReadyToPay({
@@ -34,8 +60,6 @@ getToken().then(async (client_token) => {
     throw 'Google Instance is not ready to Pay';
   }
 
-  const resultData = document.querySelector('#result-data');
-  const customerData = document.querySelector('#customer-data');
 
   // const buttonClickHandler = async function (event) {
   const buttonClickHandler = async function (event) {
@@ -45,7 +69,7 @@ getToken().then(async (client_token) => {
       transactionInfo: {
         currencyCode: 'USD',
         totalPriceStatus: 'FINAL',
-        totalPrice: '1.00' // Your amount
+        totalPrice: '0.01' // Your amount
       }
     });
 
@@ -58,26 +82,9 @@ getToken().then(async (client_token) => {
       format: 'FULL'
     };
 
-    paymentsClient.loadPaymentData(paymentDataRequest)
-    .then(function (paymentData) {
-      return googlePaymentInstance.parseResponse(paymentData);
-    }).then(function (result) {
-      resultData.value = JSON.stringify(result, null, 2);
-      return fetch('http://localhost:8000/customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify({ "nonce": result.nonce })
-      });
-    }).then(function (data) {
-      return data.json();
-    }).then(function(data) {
-      customerData.value = JSON.stringify(data, null, 2);
-    }).catch(function (err) {
-      alert('Failure ' + err);
-    });
+    loadPaymentData(googlePaymentInstance, paymentsClient, paymentDataRequest);
   };
+
 
   const buttonContainer = document.querySelector('#button-container');
   const button = paymentsClient.createButton({

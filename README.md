@@ -7,7 +7,15 @@ This is an example for a "Hosted Fields" client for using Google Pay on a Braint
 - Install Node if you don't have it - https://nodejs.org/en/download/.
 - This client relies on the matching server found at https://github.com/juan-m-medina/bt-test-server.
 - Clone the repo to a location of your choice.
-- Update the ```config.json``` file to the url/endpoint for the server you are using.
+- Create a ```config.json``` file to the url/endpoint for the server you are using. Example for TEST below. For PRODUCTION make sure to update the values accordingly.
+  ```
+  config = {  
+    "environment": "TEST", 
+    "merchantId": "_type_here_your_google_merchant_id_can_be_empty_on_test_",
+    "tokenEndpoint": "http://localhost:8000/token",  
+    "customerEndpoint": "http://localhost:8000/customer"
+  }  
+  ```
 - Run `npx http-server`. This should install all the necessary node dependencies
 - You should get output that looks something like this:
   ```
