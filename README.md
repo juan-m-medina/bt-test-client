@@ -1,4 +1,4 @@
-# What is this repo about?
+# What this repo is about
 
 This is an example for a "Hosted Fields" client for using Google Pay on a Braintree account.
 
